@@ -1,14 +1,23 @@
 from fastapi import Depends, FastAPI,HTTPException,Response,Request
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlmodel import Session,select
 from sqlalchemy.exc import IntegrityError
+from app.config import settings
 import jwt
-
+from fastapi.middleware.cors import CORSMiddleware
+security=HTTPBearer()
 from app.database import get_session
 from app.models import User
 from app.schemas import UserCreate, UserLogin
 from app.security import hash_password,verify_password,create_access_token,create_refresh_token
-
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.post("/register")
@@ -46,6 +55,7 @@ def register(
 @app.post("/login")
 def login(
     user_data: UserLogin,
+    response:Response,
     session: Session = Depends(get_session)
 ):
     statement = select(User).where(User.email == user_data.email)
@@ -64,7 +74,7 @@ def login(
         )
     access_token = create_access_token(user.id)
     refresh_token = create_refresh_token(user.id)
-    Response.set_cookie(
+    response.set_cookie(
     key="refresh_token",
     value=refresh_token,
     httponly=True,
@@ -107,4 +117,23 @@ def refresh(
     return {
         "access_token": access_token,
         "token_type": "bearer"
+    }
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    token = credentials.credentials
+    payload = jwt.decode(
+    token,
+    settings.jwt_secret_key,
+    algorithms=["HS256"]
+)
+    user_id = int(payload["sub"])
+    return user_id
+
+@app.get("/protected")
+def protected(user_id: int = Depends(get_current_user)):
+    return {
+        "message": "You are authenticated!",
+        "user_id": user_id
     }

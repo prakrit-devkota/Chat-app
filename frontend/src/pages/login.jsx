@@ -1,12 +1,38 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-export default function LoginPage({ onSubmit }) {
+import axios from "axios";
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    onSubmit?.({ email, password });
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/login",
+        {
+          email,
+          password,
+        }
+      );
+      const accessToken = response.data.access_token;
+      localStorage.setItem("access_token", accessToken);
+      console.log("Logged in!");
+    } catch (error) {
+      console.log(error.response?.data);
+    }
+    const token = localStorage.getItem("access_token");
+
+    const protectedResponse = await axios.get(
+      "http://localhost:8000/protected",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log(protectedResponse.data);
   }
 
   return (
