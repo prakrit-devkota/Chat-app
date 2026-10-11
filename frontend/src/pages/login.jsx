@@ -1,38 +1,36 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../api/api.js";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
+
     try {
-      const response = await axios.post(
-        "http://localhost:8000/login",
-        {
-          email,
-          password,
-        }
-      );
+      const response = await api.post("/login", {
+        email,
+        password,
+      });
+
       const accessToken = response.data.access_token;
+
       localStorage.setItem("access_token", accessToken);
+
       console.log("Logged in!");
+
+      setTimeout(async () => {
+        try {
+          const response = await api.get("/protected");
+          console.log(response.data);
+        } catch (error) {
+          console.log(error.response?.data);
+        }
+      }, 11000);
     } catch (error) {
       console.log(error.response?.data);
     }
-    const token = localStorage.getItem("access_token");
-
-    const protectedResponse = await axios.get(
-      "http://localhost:8000/protected",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    console.log(protectedResponse.data);
   }
 
   return (

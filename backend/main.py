@@ -123,14 +123,23 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     token = credentials.credentials
-    payload = jwt.decode(
-    token,
-    settings.jwt_secret_key,
-    algorithms=["HS256"]
-)
-    user_id = int(payload["sub"])
-    return user_id
 
+    try:
+        payload = jwt.decode(
+            token,
+            settings.jwt_secret_key,
+            algorithms=["HS256"]
+        )
+
+        user_id = int(payload["sub"])
+
+        return user_id
+
+    except (jwt.InvalidTokenError, KeyError, ValueError):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired token"
+        )
 @app.get("/protected")
 def protected(user_id: int = Depends(get_current_user)):
     return {

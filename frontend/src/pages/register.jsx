@@ -1,30 +1,33 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../api/api.js";
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-async function handleSubmit(e) {
-  e.preventDefault();
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
 
-  try {
-    const response = await axios.post(
-      "http://localhost:8000/register",
-      {
+    setError("");
+
+    try {
+      const response = await api.post("/register", {
         username,
         email,
         password,
-      }
-    );
+      });
 
-    console.log(response.data);
-  } catch (error) {
-    console.log(error.response?.data);
+      console.log(response.data);
+    } catch (error) {
+      console.log(error.response?.data);
+    }
   }
-}
   return (
     <div style={styles.page}>
       <style>{`
