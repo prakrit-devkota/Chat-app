@@ -3,6 +3,7 @@ import HomePage from './pages/home.jsx'
 import LoginPage from './pages/login.jsx'
 import RegisterPage from './pages/register.jsx'
 import ChatPage from './pages/chatpage.jsx'
+import ProtectedRoute from './components/protected_route.jsx'
 import { useNavigate } from 'react-router-dom'
 
 
@@ -16,8 +17,9 @@ function App() {
             onGuest={() => navigate('/chat')}/>} />
      <Route path="/login" element={<LoginPage />} />
      <Route path="/register" element={<RegisterPage />} />
-     <Route path="/chat" element={<ChatPage />} />
-      
+     <Route path="/chat" element={<ProtectedRoute />}>
+       <Route index element={<ChatPage />} />
+     </Route>
     </Routes>
   )
 }

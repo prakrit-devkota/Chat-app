@@ -146,3 +146,21 @@ def protected(user_id: int = Depends(get_current_user)):
         "message": "You are authenticated!",
         "user_id": user_id
     }
+
+
+@app.get("/users")
+def get_users(
+    current_user_id: int = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    statement = select(User)
+    users = session.exec(statement).all()
+
+    return [
+        {
+            "id": user.id,
+            "username": user.username,
+        }
+        for user in users
+        if user.id != current_user_id
+    ]

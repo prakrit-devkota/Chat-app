@@ -1,3 +1,3 @@
 from datetime import datetime, timezone
-def  utc_now():
+def  utcnow() -> datetime:
     return datetime.now(timezone.utc)

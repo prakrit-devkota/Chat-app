@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import api from "../api/api.js";
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const navigate=useNavigate()
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -19,15 +21,7 @@ export default function LoginPage() {
       localStorage.setItem("access_token", accessToken);
 
       console.log("Logged in!");
-
-      setTimeout(async () => {
-        try {
-          const response = await api.get("/protected");
-          console.log(response.data);
-        } catch (error) {
-          console.log(error.response?.data);
-        }
-      }, 11000);
+      navigate("/chat");
     } catch (error) {
       console.log(error.response?.data);
     }
