@@ -7,3 +7,11 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class IncomingMessage(BaseModel):
+    type: str
+    conversation_id: int
+    body: str
+
+class ConversationCreate(BaseModel):
+    user_b_id:int
