@@ -6,7 +6,6 @@ class ConnectionManager:
         self.active: dict[int, set[WebSocket]] = {}
 
     async def connect(self, user_id: int, ws: WebSocket) -> bool:
-        await ws.accept()
         first_connection = user_id not in self.active
         self.active.setdefault(user_id, set()).add(ws)
         return first_connection

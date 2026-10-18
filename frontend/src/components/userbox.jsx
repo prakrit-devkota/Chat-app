@@ -6,7 +6,8 @@ export default function UserBox({ user, onClickbox, onclickfrnd }) {
 
   const username = user?.username ?? "Unknown";
   const displayName = username.charAt(0).toUpperCase() + username.slice(1);
-  const status = user?.status || "Offline";
+  const isOnline = Boolean(user?.is_online ?? user?.status === "Online");
+  const status = isOnline ? "Online" : "Offline";
 
   return (
     <div
