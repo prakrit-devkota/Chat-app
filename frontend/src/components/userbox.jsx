@@ -1,8 +1,12 @@
-import { useState } from "react";
 import { UserPlus, UserCheck } from "lucide-react";
 
-export default function UserBox({ user, onClickbox, onclickfrnd }) {
-  const [requestSent, setRequestSent] = useState(false);
+export default function UserBox({
+  user,
+  onClickbox,
+  onFriendRequest,
+  requestStatus = "none",
+  sendingRequest = false,
+}) {
 
   const username = user?.username ?? "Unknown";
   const displayName = username.charAt(0).toUpperCase() + username.slice(1);
@@ -38,19 +42,37 @@ export default function UserBox({ user, onClickbox, onclickfrnd }) {
         className={`ml-auto shrink-0 w-10 h-10 rounded-full flex items-center justify-center
           transition-colors duration-200 border
           ${
-            requestSent
+            requestStatus !== "none"
               ? "bg-blue-50 border-blue-200 text-blue-600"
               : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600"
           }`}
         onClick={(event) => {
           event.stopPropagation();
-          setRequestSent((prev) => !prev);
-          onclickfrnd?.();
+          onFriendRequest?.();
         }}
-        aria-label={requestSent ? "Friend request sent" : "Send friend request"}
-        title={requestSent ? "Friend request sent" : "Send friend request"}
+        disabled={requestStatus !== "none" || sendingRequest}
+        aria-label={
+          requestStatus === "friend"
+            ? "Already friends"
+            : requestStatus === "incoming"
+              ? "Friend request received"
+              : requestStatus === "sent"
+                ? "Friend request sent"
+                : "Send friend request"
+        }
+        title={
+          requestStatus === "friend"
+            ? "Already friends"
+            : requestStatus === "incoming"
+              ? "Friend request received; open Friends to accept"
+              : requestStatus === "sent"
+                ? "Friend request sent"
+                : sendingRequest
+                  ? "Sending friend request"
+                  : "Send friend request"
+        }
       >
-        {requestSent ? (
+        {requestStatus !== "none" ? (
           <UserCheck className="w-5 h-5" />
         ) : (
           <UserPlus className="w-5 h-5" />

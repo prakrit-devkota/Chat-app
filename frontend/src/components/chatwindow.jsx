@@ -4,13 +4,16 @@ import { UserPlus, UserCheck } from "lucide-react";
 
 export default function ChatWindow({
   user,
+  onFriendRequest,
+  requestStatus = "none",
+  sendingRequest = false,
   socket,
   conversationId,
   messages = [],
   loadingMessages = false,
 }) {
   const [text, setText] = useState("");
-  const [requestSent, setRequestSent] = useState(false);
+ 
 
   if (!user) {
     return (
@@ -82,19 +85,34 @@ export default function ChatWindow({
           className={`ml-auto shrink-0 w-10 h-10 rounded-full flex items-center justify-center
             transition-colors duration-200 border
             ${
-              requestSent
+              requestStatus !== "none"
                 ? "bg-blue-50 border-blue-200 text-blue-600"
                 : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600"
             }`}
-          onClick={() => setRequestSent((prev) => !prev)}
+          onClick={onFriendRequest}
+          disabled={requestStatus !== "none" || sendingRequest}
           aria-label={
-            requestSent ? "Friend request sent" : "Send friend request"
+            requestStatus === "friend"
+              ? "Already friends"
+              : requestStatus === "incoming"
+                ? "Friend request received"
+                : requestStatus === "sent"
+                  ? "Friend request sent"
+                  : "Send friend request"
           }
           title={
-            requestSent ? "Friend request sent" : "Send friend request"
+            requestStatus === "friend"
+              ? "Already friends"
+              : requestStatus === "incoming"
+                ? "Friend request received; open Friends to accept"
+                : requestStatus === "sent"
+                  ? "Friend request sent"
+                  : sendingRequest
+                    ? "Sending friend request"
+                    : "Send friend request"
           }
         >
-          {requestSent ? (
+          {requestStatus !== "none" ? (
             <UserCheck className="w-5 h-5" />
           ) : (
             <UserPlus className="w-5 h-5" />
