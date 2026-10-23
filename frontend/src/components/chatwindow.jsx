@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import { UserPlus, UserCheck } from "lucide-react";
+import { Video, UserPlus, UserCheck } from "lucide-react";
+import CallWindow from "./callwindow";
 
 export default function ChatWindow({
   user,
@@ -13,6 +14,7 @@ export default function ChatWindow({
   loadingMessages = false,
 }) {
   const [text, setText] = useState("");
+  const [callOpen, setCallOpen] = useState(false);
  
 
   if (!user) {
@@ -60,7 +62,7 @@ export default function ChatWindow({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="relative flex h-full flex-col">
       {/* Header */}
       <div className="flex items-center gap-3 p-4 bg-white border-b border-gray-200">
         <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-semibold text-lg shrink-0">
@@ -79,10 +81,21 @@ export default function ChatWindow({
           </p>
         </div>
 
-        {/* Friend request button */}
-        <button
-          type="button"
-          className={`ml-auto shrink-0 w-10 h-10 rounded-full flex items-center justify-center
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-emerald-300 bg-emerald-100 text-emerald-800 shadow-sm transition-colors hover:bg-emerald-200"
+            onClick={() => setCallOpen(true)}
+            aria-label={`Start video call with ${displayName}`}
+            title={`Video call with ${displayName}`}
+          >
+            <Video aria-hidden="true" className="h-5 w-5" />
+          </button>
+
+          {/* Friend request button */}
+          <button
+            type="button"
+            className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center
             transition-colors duration-200 border
             ${
               requestStatus !== "none"
@@ -111,21 +124,19 @@ export default function ChatWindow({
                     ? "Sending friend request"
                     : "Send friend request"
           }
-        >
-          {requestStatus !== "none" ? (
-            <UserCheck className="w-5 h-5" />
-          ) : (
-            <UserPlus className="w-5 h-5" />
-          )}
-        </button>
+          >
+            {requestStatus !== "none" ? (
+              <UserCheck className="w-5 h-5" />
+            ) : (
+              <UserPlus className="w-5 h-5" />
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+      <div className="flex-1 space-y-2 overflow-y-auto p-4">
         {loadingMessages ? (
-          <p className="text-center text-gray-400">
-            Loading messages...
-          </p>
+          <p className="text-center text-gray-400">Loading messages...</p>
         ) : messages.length === 0 ? (
           <p className="text-center text-gray-400">
             No messages yet. Say hello!
@@ -134,12 +145,10 @@ export default function ChatWindow({
           messages.map((m) => (
             <div
               key={m.id}
-              className={`flex ${
-                m.fromMe ? "justify-end" : "justify-start"
-              }`}
+              className={`flex ${m.fromMe ? "justify-end" : "justify-start"}`}
             >
               <span
-                className={`px-3 py-2 rounded-lg max-w-xs break-words ${
+                className={`max-w-xs break-words rounded-lg px-3 py-2 ${
                   m.fromMe
                     ? "bg-blue-500 text-white"
                     : "bg-gray-200 text-gray-900"
@@ -152,8 +161,7 @@ export default function ChatWindow({
         )}
       </div>
 
-      {/* Input */}
-      <div className="flex gap-2 p-4 bg-white border-t border-gray-200">
+      <div className="flex gap-2 border-t border-gray-200 bg-white p-4">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -161,18 +169,22 @@ export default function ChatWindow({
             if (e.key === "Enter") handleSend();
           }}
           placeholder="Type a message..."
-          className="flex-1 border border-gray-300 rounded-full px-4 py-2 outline-none focus:border-blue-500"
+          className="flex-1 rounded-full border border-gray-300 px-4 py-2 outline-none focus:border-blue-500"
         />
 
         <button
           type="button"
           onClick={handleSend}
           disabled={!conversationId || loadingMessages}
-          className="bg-blue-500 text-white px-5 rounded-full disabled:opacity-50"
+          className="rounded-full bg-blue-500 px-5 text-white disabled:opacity-50"
         >
           Send
         </button>
       </div>
+
+      {callOpen && (
+        <CallWindow user={user} onClose={() => setCallOpen(false)} />
+      )}
     </div>
   );
 }
